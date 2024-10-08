@@ -1,0 +1,151 @@
+volumes:
+
+  order-srcs:
+    name: order-srcs
+    driver: local
+    driver_opts:
+      device: ./requirements/order/src
+      o : bind
+      type : none
+
+  stock-srcs:
+    name: stock-srcs
+    driver: local
+    driver_opts:
+      device: ./requirements/stock/src
+      o : bind
+      type : none
+
+
+networks:
+
+  order:
+    name: order
+  
+  stock:
+    name: stock
+
+
+services:
+
+  order-db:
+    image: postgres
+    container_name: order-db
+    volumes:
+      - ./requirements/order/data:/var/lib/postgresql/data
+    env_file :
+      - .env
+    networks :
+      - order
+    shm_size: 128mb
+    restart: always
+
+  order-drf:
+    image: order-drf:fgomez-d
+    container_name: order-drf
+    build:
+      - context: ./requirements/order/src
+      - dockerfile: Dockerfile.drf
+    volumes:
+      - order-srcs:/usr/src/app
+    env_file :
+      - .env
+    networks :
+      - order
+    depends_on:
+      - order-db
+      - message-broker
+    restart: always
+
+  order-celery:
+    image: order-celery:fgomez-d
+    container_name: order-celery
+    build:
+      - context: ./requirements/order/src
+      - dockerfile: Dockerfile.celery
+    volumes:
+      - order-srcs:/usr/src/app
+    env_file :
+      - .env
+    networks :
+      - order
+    depends_on:
+      - order-db
+      - message-broker
+    restart: always
+
+  stock-db:
+    image: postgres
+    container_name: stock-db
+    volumes:
+      - ./requirements/stock/data:/var/lib/postgresql/data
+    env_file :
+      - .env
+    networks :
+      - stock
+    shm_size: 128mb
+    restart: always
+
+  stock-drf:
+    image: stock-drf:fgomez-d
+    container_name: stock-drf
+    build: 
+      - context: ./requirements/stock/src
+      - dockerfile: Dockerfile.drf
+    volumes:
+      - stock-srcs:/usr/src/app
+    env_file :
+      - .env
+    networks :
+      - stock
+    depends_on:
+      - stock-db
+      - message-broker
+    restart: always
+
+  stock-celery:
+    image: stock-celery:fgomez-d
+    container_name: stock-celery
+    build:
+      - context: ./requirements/stock/src
+      - dockerfile: Dockerfile.celery
+    volumes:
+      - stock-srcs:/usr/src/app
+    env_file :
+      - .env
+    networks :
+      - stock
+    depends_on:
+      - stock-db
+      - message-broker
+    restart: always
+
+  message-broker:
+    image: rabbitmq:4-management-alpine
+    container_name: message-broker
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ./requirements/message_broker/data:/var/lib/rabbitmq
+        - ./requirements/message_broker/log:/var/log/rabbitmq
+    build: ./requirements/message_broker
+    networks:
+      - order
+      - stock
+    restart: always
+
+  nginx:
+    image: nginx:fgomez-d
+    container_name: nginx
+    build: ./requirements/api_gateway
+    ports:
+      - "443:443"
+    depends_on:
+      - order-drf
+      - stock-drf
+    networks:
+      - order
+      - stock
+    restart: always
+
