@@ -45,7 +45,7 @@ services:
     container_name: order-drf
     build:
       - context: ./requirements/order/src
-      - dockerfile: Dockerfile.drf
+      - dockerfile: Dockerfile
     volumes:
       - order-srcs:/usr/src/app
     env_file :
@@ -56,13 +56,14 @@ services:
       - order-db
       - message-broker
     restart: always
+    command: [/bin/sh, drf_startup.sh]
 
   order-celery:
     image: order-celery:fgomez-d
     container_name: order-celery
     build:
       - context: ./requirements/order/src
-      - dockerfile: Dockerfile.celery
+      - dockerfile: Dockerfile
     volumes:
       - order-srcs:/usr/src/app
     env_file :
@@ -73,6 +74,7 @@ services:
       - order-db
       - message-broker
     restart: always
+    command: [/bin/sh, celery_startup.sh]
 
   stock-db:
     image: postgres
@@ -91,7 +93,7 @@ services:
     container_name: stock-drf
     build: 
       - context: ./requirements/stock/src
-      - dockerfile: Dockerfile.drf
+      - dockerfile: Dockerfile
     volumes:
       - stock-srcs:/usr/src/app
     env_file :
@@ -102,13 +104,14 @@ services:
       - stock-db
       - message-broker
     restart: always
+    command: [/bin/sh, drf_startup.sh]
 
   stock-celery:
     image: stock-celery:fgomez-d
     container_name: stock-celery
     build:
       - context: ./requirements/stock/src
-      - dockerfile: Dockerfile.celery
+      - dockerfile: Dockerfile
     volumes:
       - stock-srcs:/usr/src/app
     env_file :
@@ -119,6 +122,7 @@ services:
       - stock-db
       - message-broker
     restart: always
+    command: [/bin/sh, celery_startup.sh]
 
   message-broker:
     image: rabbitmq:4-management-alpine
