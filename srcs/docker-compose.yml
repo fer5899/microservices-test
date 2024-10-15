@@ -8,121 +8,110 @@ volumes:
       o : bind
       type : none
 
-  stock-srcs:
-    name: stock-srcs
-    driver: local
-    driver_opts:
-      device: ./requirements/stock/src
-      o : bind
-      type : none
+  # stock-srcs:
+  #   name: stock-srcs
+  #   driver: local
+  #   driver_opts:
+  #     device: ./requirements/stock/src
+  #     o : bind
+  #     type : none
 
 
 networks:
 
-  order:
-    name: order
-  
-  stock:
-    name: stock
+  microservices:
+    name: microservices
 
 
 services:
 
   order-db:
-    image: postgres
+    image: postgres:17
     container_name: order-db
     volumes:
       - ./requirements/order/data:/var/lib/postgresql/data
     env_file :
       - .env
     networks :
-      - order
+      - microservices
     shm_size: 128mb
     restart: always
 
   order-drf:
     image: order-drf:fgomez-d
     container_name: order-drf
-    build:
-      - context: ./requirements/order/src
-      - dockerfile: Dockerfile
+    build: ./requirements/order
     volumes:
       - order-srcs:/usr/src/app
     env_file :
       - .env
     networks :
-      - order
+      - microservices
     depends_on:
       - order-db
       - message-broker
     restart: always
     command: [/bin/sh, drf_startup.sh]
 
-  order-celery:
-    image: order-celery:fgomez-d
-    container_name: order-celery
-    build:
-      - context: ./requirements/order/src
-      - dockerfile: Dockerfile
-    volumes:
-      - order-srcs:/usr/src/app
-    env_file :
-      - .env
-    networks :
-      - order
-    depends_on:
-      - order-db
-      - message-broker
-    restart: always
-    command: [/bin/sh, celery_startup.sh]
+  # order-celery:
+  #   image: order-celery:fgomez-d
+  #   container_name: order-celery
+  #   build: ./requirements/order/src
+  #   volumes:
+  #     - order-srcs:/usr/src/app
+  #   env_file :
+  #     - .env
+  #   networks :
+  #     - microservices
+  #   depends_on:
+  #     - order-db
+  #     - message-broker
+  #   restart: always
+  #   command: [/bin/sh, /usr/src/app/conf/celery_startup.sh]
 
-  stock-db:
-    image: postgres
-    container_name: stock-db
-    volumes:
-      - ./requirements/stock/data:/var/lib/postgresql/data
-    env_file :
-      - .env
-    networks :
-      - stock
-    shm_size: 128mb
-    restart: always
+  # stock-db:
+  #   image: postgres:17
+  #   container_name: stock-db
+  #   volumes:
+  #     - ./requirements/stock/data:/var/lib/postgresql/data
+  #   env_file :
+  #     - .env
+  #   networks :
+  #     - microservices
+  #   shm_size: 128mb
+  #   restart: always
 
-  stock-drf:
-    image: stock-drf:fgomez-d
-    container_name: stock-drf
-    build: 
-      - context: ./requirements/stock/src
-      - dockerfile: Dockerfile
-    volumes:
-      - stock-srcs:/usr/src/app
-    env_file :
-      - .env
-    networks :
-      - stock
-    depends_on:
-      - stock-db
-      - message-broker
-    restart: always
-    command: [/bin/sh, drf_startup.sh]
+  # stock-drf:
+  #   image: stock-drf:fgomez-d
+  #   container_name: stock-drf
+  #   build: ./requirements/stock/src
+  #   volumes:
+  #     - stock-srcs:/usr/src/app
+  #   env_file :
+  #     - .env
+  #   networks :
+  #     - microservices
+  #   depends_on:
+  #     - stock-db
+  #     - message-broker
+  #   restart: always
+  #   command: [/bin/sh, drf_startup.sh]
 
-  stock-celery:
-    image: stock-celery:fgomez-d
-    container_name: stock-celery
-    build:
-      - context: ./requirements/stock/src
-      - dockerfile: Dockerfile
-    volumes:
-      - stock-srcs:/usr/src/app
-    env_file :
-      - .env
-    networks :
-      - stock
-    depends_on:
-      - stock-db
-      - message-broker
-    restart: always
-    command: [/bin/sh, celery_startup.sh]
+  # stock-celery:
+  #   image: stock-celery:fgomez-d
+  #   container_name: stock-celery
+  #   build: ./requirements/stock/src
+  #   volumes:
+  #     - stock-srcs:/usr/src/app
+  #   env_file :
+  #     - .env
+  #   networks :
+  #     - microservices
+  #   depends_on:
+  #     - stock-db
+  #     - message-broker
+  #   restart: always
+  #   command: [/bin/sh, celery_startup.sh]
 
   message-broker:
     image: rabbitmq:4-management-alpine
@@ -133,10 +122,8 @@ services:
     volumes:
         - ./requirements/message_broker/data:/var/lib/rabbitmq
         - ./requirements/message_broker/log:/var/log/rabbitmq
-    build: ./requirements/message_broker
     networks:
-      - order
-      - stock
+      - microservices
     restart: always
 
   nginx:
@@ -147,9 +134,7 @@ services:
       - "443:443"
     depends_on:
       - order-drf
-      - stock-drf
+      # - stock-drf
     networks:
-      - order
-      - stock
+      - microservices
     restart: always
-

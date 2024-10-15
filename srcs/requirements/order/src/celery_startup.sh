@@ -8,11 +8,11 @@ echo "RabbitMQ is available."
 
 
 echo "Waiting for Postgres..."
-while ! nc -z stock-db 5432; do
+while ! nc -z order-db 5432; do
   sleep 1
 done
 echo "Postgres is available."
 
 
 echo "Starting Celery worker..."
-celery -A stock_service worker --loglevel=info --concurrency=4
+celery -A order_service worker --loglevel=info --concurrency=4
