@@ -15,4 +15,4 @@ echo "Postgres is available."
 
 
 echo "Starting Celery worker..."
-celery -A order_service worker --loglevel=info --concurrency=4
+exec celery -A order_service worker --loglevel=info --concurrency=4

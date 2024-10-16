@@ -4,8 +4,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 urlpatterns = [
-    path('', csrf_exempt(views.OrderList.as_view())),
-    path('<int:pk>/', csrf_exempt(views.OrderDetail.as_view())),
+    path('boxes/', csrf_exempt(views.BoxList.as_view())),
+    path('boxes/<int:pk>/', csrf_exempt(views.BoxDetail.as_view())),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

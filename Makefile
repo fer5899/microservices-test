@@ -1,6 +1,4 @@
-DATA = /home/fer5899/data
-WP_DATA = $(DATA)/wordpress
-DB_DATA = $(DATA)/mariadb
+ROOT = $(shell pwd)
 
 all: up
 
@@ -8,8 +6,6 @@ build:
 	docker compose -f ./srcs/docker-compose.yml build
 
 up: build
-	@mkdir -p $(WP_DATA)
-	@mkdir -p $(DB_DATA)
 	docker compose -f ./srcs/docker-compose.yml up -d
 
 stop:

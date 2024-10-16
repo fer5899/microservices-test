@@ -7,22 +7,14 @@ from rest_framework import status, generics
 
 
 
-class OrderList(APIView):
-    """
-    List all orders, or create a new order.
-    """
-    def get(self, request, format=None):
-        orders = Order.objects.all()
-        serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data)
+class OrderList(generics.ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
 
-    def post(self, request, format=None):
-        serializer = OrderSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            # Emit order created event
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save()
+        # emit order created event
+    
 
 
 class OrderDetail(generics.RetrieveUpdateDestroyAPIView):
