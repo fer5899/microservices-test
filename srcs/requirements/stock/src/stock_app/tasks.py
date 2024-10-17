@@ -3,7 +3,7 @@ from .models import Box
 from .serializers import OrderSerializer
 from django.db import transaction
 
-@shared_task
+@shared_task(name='process_order_created_event')
 def process_order_created_event(order_data):
     # Process the order created event
     serializer = OrderSerializer(data=order_data)
@@ -21,7 +21,7 @@ def process_order_created_event(order_data):
 
     # Emit order processed event
     transaction.on_commit(lambda: current_app.send_task(
-        'orders_app.tasks.receive_order_processed_event', 
+        'receive_order_processed_event', 
         args=[validated_order_data], 
         queue='stock_events'
     ))

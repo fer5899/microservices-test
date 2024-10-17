@@ -2,7 +2,7 @@ from celery import shared_task
 from .models import Order
 from .serializers import OrderSerializer
 
-@shared_task
+@shared_task(name='receive_order_processed_event')
 def receive_order_processed_event(processed_order_data):
     order_id = processed_order_data.get('id')
     if not order_id:

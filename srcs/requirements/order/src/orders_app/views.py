@@ -19,7 +19,7 @@ class OrderList(generics.ListCreateAPIView):
         print(f"Created order: {created_order_data}")
         # emit order created event
         transaction.on_commit(lambda: current_app.send_task(
-            'stock_app.tasks.process_order_created_event', 
+            'process_order_created_event', 
             args=[created_order_data], 
             queue='order_events',
         ))
