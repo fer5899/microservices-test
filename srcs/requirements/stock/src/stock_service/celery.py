@@ -7,7 +7,7 @@ from celery import Celery
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'stock_service.settings')
 
-app = Celery('stock_service')
+app = Celery('stock_celery_service')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+from kombu import Exchange, Queue
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -141,3 +142,20 @@ CELERY_TIMEZONE = 'UTC'
 
 # If you need to set a timeout to handle long-running tasks gracefully
 CELERY_TASK_TIME_LIMIT = 300  # Limit each task to a maximum of 5 minutes
+
+# Define the exchanges
+# order_events_exchange = Exchange('order_events', type='fanout', durable=True)
+# stock_events_exchange = Exchange('stock_events', type='fanout', durable=True)
+
+# Define the queue and bind it to the exchange
+# CELERY_TASK_QUEUES = (
+#     Queue('order_created_queue', exchange=order_events_exchange),
+#     Queue('order_processed_queue', exchange=stock_events_exchange),
+# )
+
+CELERY_TASK_ROUTES = {
+    'orders_app.tasks.receive_order_processed_event': {
+        'queue': 'stock_events',
+    },
+}
+
