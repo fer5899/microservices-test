@@ -50,6 +50,8 @@ services:
     depends_on:
       - order-db
       - message-broker
+    ports:
+      - 8001:8000
     restart: always
     command: [/bin/sh, drf_startup.sh]
 
@@ -94,6 +96,8 @@ services:
     depends_on:
       - stock-db
       - message-broker
+    ports:
+      - 8002:8000
     restart: always
     command: [/bin/sh, drf_startup.sh]
 
