@@ -24,6 +24,7 @@ fclean:
 
 logs:
 	
+recompose: down up
 
 re: fclean up
 	
