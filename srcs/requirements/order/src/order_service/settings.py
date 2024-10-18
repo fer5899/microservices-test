@@ -130,8 +130,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Celery settings
+
 # Celery broker settings - connect to RabbitMQ running in the 'message-broker' container
 CELERY_BROKER_URL = 'amqp://guest:guest@message-broker:5672//'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # If using a result backend, such as Redis or PostgreSQL:
 CELERY_RESULT_BACKEND = None  # You can change this if you need task results
@@ -142,16 +145,6 @@ CELERY_TIMEZONE = 'UTC'
 
 # If you need to set a timeout to handle long-running tasks gracefully
 CELERY_TASK_TIME_LIMIT = 300  # Limit each task to a maximum of 5 minutes
-
-# Define the exchanges
-# order_events_exchange = Exchange('order_events', type='fanout', durable=True)
-# stock_events_exchange = Exchange('stock_events', type='fanout', durable=True)
-
-# Define the queue and bind it to the exchange
-# CELERY_TASK_QUEUES = (
-#     Queue('order_created_queue', exchange=order_events_exchange),
-#     Queue('order_processed_queue', exchange=stock_events_exchange),
-# )
 
 CELERY_TASK_ROUTES = {
     'orders_app.tasks.receive_order_processed_event': {
